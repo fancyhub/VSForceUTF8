@@ -1,5 +1,7 @@
 # Force UTF-8 
-Support Visual Studio 2022
+A Visual Studio 2022 Extention
+it's used for forcing to save the file into utf8 while saving files
+
 
 ### Install
 - download .vsix
