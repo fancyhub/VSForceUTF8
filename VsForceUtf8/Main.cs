@@ -83,16 +83,14 @@ namespace VsForceUtf8
             }
 
             //we must save these two references
-            // https://social.msdn.microsoft.com/Forums/en-US/0857a868-e650-42ed-b9cc-2975dc46e994/addin-documentevents-are-not-triggered?forum=vsx
             mDteEvents = mDte.Events;
             mDocumentEvents = mDteEvents.DocumentEvents;
-
-            mDocumentEvents.DocumentSaved += DocumentEvents_DocumentSaved;
+            mDocumentEvents.DocumentSaved += _OnDocumentSaved;
 
             _Log("Init Succ \n");
         }
 
-        private void DocumentEvents_DocumentSaved(Document document)
+        private void _OnDocumentSaved(Document document)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -118,13 +116,33 @@ namespace VsForceUtf8
 
 
             //Replace Line Ending
-            text = ReplaceLineEndings(text, mConfig.LineEnding);
+            text = _ReplaceLineEndings(text, mConfig.LineEnding);
 
             //Save
             string path = document.FullName;
             File.WriteAllText(path, text, new UTF8Encoding(mConfig.Bom));
 
             _Log($"Succ, Bom: {mConfig.Bom}, LineEnding: {mConfig.LineEnding},  Path: {path} \n");
+        }      
+
+        private static string _ReplaceLineEndings(string text, ELineEnding line_ending)
+        {
+            switch (line_ending)
+            {
+                default:
+                case ELineEnding.None:
+                    //Do Nothing
+                    return text;
+
+                case ELineEnding.Window:
+                    return RegLineEnding.Replace(text, "\r\n");
+
+                case ELineEnding.Unix:
+                    return RegLineEnding.Replace(text, "\n");
+
+                case ELineEnding.Mac:
+                    return RegLineEnding.Replace(text, "\r");
+            }
         }
 
         private void _Log(string msg)
@@ -143,26 +161,6 @@ namespace VsForceUtf8
 
             mOutputWindowPanel.OutputString(msg);
             mOutputWindowPanel.OutputString("\n");
-        }
-
-        private static string ReplaceLineEndings(string text, ELineEnding line_ending)
-        {
-            switch (line_ending)
-            {
-                default:
-                case ELineEnding.None:
-                    //Do Nothing
-                    return text;
-
-                case ELineEnding.Window:
-                    return RegLineEnding.Replace(text, "\r\n");
-
-                case ELineEnding.Unix:
-                    return RegLineEnding.Replace(text, "\n");
-
-                case ELineEnding.Mac:
-                    return RegLineEnding.Replace(text, "\r");
-            }
         }
 
         private static OutputWindowPane _CreateOutputPanel(DTE dte)

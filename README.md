@@ -13,3 +13,4 @@ it's used for forcing to save the file into utf8 while saving files
 
 ### Reference
 	https://github.com/Ocrosoft/Force-UTF8-2022
+	https://github.com/genrwoody/vs_file_encoding
